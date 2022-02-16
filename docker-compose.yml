@@ -1,0 +1,37 @@
+version: '3.7'
+services:
+  # フロント
+  web: 
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    # appコンテナに依存（appコンテナが立ち上がったらコンテナを立ち上げる）
+    depends_on:
+      - app
+    ports:
+      - 8080:80
+    environment:
+      APP_SERVER: http://app:80
+
+  # API
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    # dbコンテナに依存（dbコンテナが立ち上がったらコンテナを立ち上げる）
+    depends_on:
+      - db
+    environment:
+      REDIS_HOST: db
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+
+  # データベース
+  db:
+    image: redis:5.0.6-alpine3.10
+    volumes:
+      - c5kvs_redis_volume:/data
+volumes:
+  # DB用のボリューム
+  c5kvs_redis_volume:
+    driver: local
